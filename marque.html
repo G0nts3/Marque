@@ -1,0 +1,564 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Officina — By Introduction Only</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,300;9..144,400;9..144,600&family=Manrope:wght@300;400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --notte:#0A0A0B;
+    --ombra:#141416;
+    --bronzo:#8C6D46;
+    --bronzo-bright:#B08A5C;
+    --rosso:#5C1A1A;
+    --avorio:#EDE8E1;
+    --grigio:#6B6862;
+    --filo:#2A2A2C;
+    --ease: cubic-bezier(0.19, 1, 0.22, 1);
+  }
+
+  *{ margin:0; padding:0; box-sizing:border-box; }
+
+  html{ scroll-behavior:smooth; }
+
+  body{
+    background:var(--notte);
+    color:var(--avorio);
+    font-family:'Manrope', sans-serif;
+    font-weight:300;
+    overflow-x:hidden;
+  }
+
+  ::selection{ background:var(--bronzo); color:var(--notte); }
+
+  h1,h2,h3, .display{
+    font-family:'Fraunces', serif;
+    font-weight:400;
+    letter-spacing:0.01em;
+  }
+
+  .mono{ font-family:'IBM Plex Mono', monospace; letter-spacing:0.08em; text-transform:uppercase; }
+
+  a{ color:inherit; text-decoration:none; }
+
+  /* ---------- NAV ---------- */
+  .nav{
+    position:fixed; top:0; left:0; right:0; z-index:100;
+    display:flex; justify-content:center; align-items:center;
+    padding:28px 0;
+    opacity:0;
+    transition:opacity 1.2s var(--ease);
+    pointer-events:none;
+  }
+  .nav.visible{ opacity:1; pointer-events:auto; }
+  .nav-mark{
+    font-size:0.72rem;
+    letter-spacing:0.42em;
+    text-transform:uppercase;
+    font-family:'IBM Plex Mono', monospace;
+    color:var(--avorio);
+  }
+  .nav-edge{
+    position:fixed; top:0; left:0; height:100vh; width:14px; z-index:99;
+  }
+  .nav-menu{
+    position:fixed; top:0; left:0; height:100vh; width:0;
+    background:rgba(10,10,11,0.97);
+    border-right:1px solid var(--filo);
+    overflow:hidden;
+    transition:width 0.6s var(--ease);
+    z-index:98;
+    display:flex; flex-direction:column; justify-content:center;
+    padding-left:0;
+  }
+  .nav-edge:hover + .nav-menu, .nav-menu:hover{
+    width:280px; padding-left:48px;
+  }
+  .nav-menu a{
+    display:block; padding:14px 0;
+    font-size:0.95rem;
+    color:var(--grigio);
+    white-space:nowrap;
+    transition:color 0.3s var(--ease);
+    border-bottom:1px solid transparent;
+  }
+  .nav-menu a:hover{ color:var(--avorio); }
+
+  /* ---------- HERO ---------- */
+  .hero{
+    height:100vh;
+    display:flex; flex-direction:column; align-items:center; justify-content:center;
+    position:relative;
+    background:
+      radial-gradient(ellipse 80% 60% at 50% 40%, rgba(140,109,70,0.10), transparent 70%),
+      linear-gradient(180deg, #050505 0%, #0A0A0B 55%, #0d0d0e 100%);
+    text-align:center;
+  }
+  .hero::before{
+    content:'';
+    position:absolute; inset:0;
+    background:
+      repeating-linear-gradient(115deg, rgba(255,255,255,0.012) 0px, rgba(255,255,255,0.012) 1px, transparent 1px, transparent 3px);
+    opacity:0.6;
+    pointer-events:none;
+  }
+  .hero-glow{
+    position:absolute; width:60vw; height:60vw; max-width:900px; max-height:900px;
+    border-radius:50%;
+    background:radial-gradient(circle, rgba(140,109,70,0.10) 0%, transparent 65%);
+    filter:blur(40px);
+    animation:breathe 8s ease-in-out infinite;
+  }
+  @keyframes breathe{
+    0%,100%{ transform:scale(1); opacity:0.7; }
+    50%{ transform:scale(1.08); opacity:1; }
+  }
+  .hero-eyebrow{
+    font-size:0.68rem;
+    color:var(--bronzo-bright);
+    margin-bottom:28px;
+    opacity:0;
+    animation:fadeUp 1.4s var(--ease) 0.4s forwards;
+  }
+  .hero-mark{
+    font-size:clamp(2.6rem, 8vw, 6.2rem);
+    line-height:0.95;
+    opacity:0;
+    animation:fadeUp 1.6s var(--ease) 0.7s forwards;
+  }
+  .hero-mark em{ font-style:italic; color:var(--bronzo-bright); }
+  .hero-line{
+    margin-top:26px;
+    font-size:0.95rem;
+    color:var(--grigio);
+    max-width:420px;
+    line-height:1.7;
+    opacity:0;
+    animation:fadeUp 1.6s var(--ease) 1.1s forwards;
+  }
+  @keyframes fadeUp{
+    from{ opacity:0; transform:translateY(18px); }
+    to{ opacity:1; transform:translateY(0); }
+  }
+  .scroll-cue{
+    position:absolute; bottom:48px;
+    font-size:0.62rem;
+    color:var(--grigio);
+    display:flex; flex-direction:column; align-items:center; gap:10px;
+    opacity:0;
+    animation:fadeUp 1.2s var(--ease) 1.8s forwards;
+  }
+  .scroll-cue-line{
+    width:1px; height:40px;
+    background:linear-gradient(var(--bronzo), transparent);
+    animation:cueMove 2.2s ease-in-out infinite;
+  }
+  @keyframes cueMove{
+    0%{ transform:scaleY(0.3); transform-origin:top; }
+    50%{ transform:scaleY(1); transform-origin:top; }
+    100%{ transform:scaleY(0.3); transform-origin:bottom; }
+  }
+
+  /* ---------- REVEAL SECTIONS ---------- */
+  section{ position:relative; }
+  .chapter{
+    min-height:100vh;
+    display:flex; align-items:center;
+    padding:120px 8vw;
+  }
+  .reveal{
+    opacity:0; filter:blur(6px); transform:translateY(28px);
+    transition:opacity 1.1s var(--ease), filter 1.1s var(--ease), transform 1.1s var(--ease);
+  }
+  .reveal.in{ opacity:1; filter:blur(0); transform:translateY(0); }
+
+  .eyebrow{
+    font-size:0.68rem;
+    color:var(--bronzo-bright);
+    margin-bottom:22px;
+    display:block;
+  }
+  .chapter-grid{
+    display:grid; grid-template-columns:0.9fr 1.1fr; gap:80px; width:100%; align-items:center;
+  }
+  .chapter h2{ font-size:clamp(1.9rem,3.6vw,3.1rem); line-height:1.15; margin-bottom:26px; }
+  .chapter p{ color:var(--grigio); line-height:1.85; font-size:0.98rem; max-width:44ch; }
+  .chapter p + p{ margin-top:18px; }
+
+  /* Heritage timeline */
+  .lineage-plate{
+    aspect-ratio:4/5;
+    background:
+      radial-gradient(circle at 30% 20%, rgba(140,109,70,0.18), transparent 55%),
+      linear-gradient(160deg, #17171a 0%, #0c0c0d 100%);
+    border:1px solid var(--filo);
+    border-radius:2px;
+    position:relative;
+    overflow:hidden;
+    display:flex; align-items:flex-end; padding:32px;
+  }
+  .lineage-plate::after{
+    content:'';
+    position:absolute; inset:0;
+    background:repeating-linear-gradient(100deg, rgba(255,255,255,0.02) 0 2px, transparent 2px 5px);
+  }
+  .lineage-caption{ position:relative; z-index:1; }
+  .lineage-caption .num{ font-family:'IBM Plex Mono',monospace; font-size:0.68rem; color:var(--bronzo-bright); letter-spacing:0.2em; }
+  .lineage-caption h3{ font-size:1.4rem; margin-top:10px; }
+
+  /* Atelier — craft strip */
+  .craft-strip{
+    display:flex; gap:2px; width:100%;
+  }
+  .craft-card{
+    flex:1; aspect-ratio:3/4;
+    background:linear-gradient(160deg,#151517,#0a0a0b);
+    border:1px solid var(--filo);
+    position:relative; overflow:hidden;
+    display:flex; align-items:flex-end; padding:20px;
+    transition:flex 0.6s var(--ease), filter 0.6s var(--ease);
+    cursor:pointer;
+  }
+  .craft-card:hover{ flex:1.6; filter:brightness(1.15); }
+  .craft-card span{ font-size:0.8rem; color:var(--avorio); }
+  .craft-card::before{
+    content:'';
+    position:absolute; inset:0;
+    background:radial-gradient(circle at var(--mx,50%) var(--my,50%), rgba(140,109,70,0.22), transparent 45%);
+    opacity:0; transition:opacity 0.4s ease;
+  }
+  .craft-card:hover::before{ opacity:1; }
+
+  /* ---------- CONFIGURATOR ---------- */
+  .commission{
+    background:var(--ombra);
+    border-top:1px solid var(--filo);
+    border-bottom:1px solid var(--filo);
+    padding:120px 8vw;
+  }
+  .commission-head{ max-width:640px; margin-bottom:64px; }
+  .commission-head h2{ font-size:clamp(1.9rem,3.6vw,3rem); margin-bottom:20px; }
+  .commission-head p{ color:var(--grigio); line-height:1.8; }
+
+  .swatch-groups{ display:grid; grid-template-columns:repeat(3, 1fr); gap:48px; }
+  .swatch-group .mono{ font-size:0.65rem; color:var(--bronzo-bright); display:block; margin-bottom:18px; }
+
+  .swatch-row{ display:flex; gap:14px; margin-bottom:14px; }
+  .swatch{
+    flex:1; aspect-ratio:1/1;
+    border-radius:2px;
+    border:1px solid var(--filo);
+    position:relative; overflow:hidden;
+    cursor:pointer;
+    transition:transform 0.4s var(--ease), border-color 0.4s var(--ease);
+  }
+  .swatch:hover{ transform:translateY(-4px); border-color:var(--bronzo); }
+  .swatch::after{
+    content:'';
+    position:absolute; inset:0;
+    background:radial-gradient(circle at var(--mx,50%) var(--my,50%), rgba(255,255,255,0.35), transparent 40%);
+    mix-blend-mode:overlay;
+    opacity:0;
+    transition:opacity 0.25s ease;
+  }
+  .swatch:hover::after{ opacity:1; }
+
+  /* paint swatches — metallic flake simulation */
+  .paint-1{ background:radial-gradient(circle at 35% 30%, #3a2e22, #0d0a07 70%); }
+  .paint-2{ background:radial-gradient(circle at 35% 30%, #1c1f24, #05070a 70%); }
+  .paint-3{ background:radial-gradient(circle at 35% 30%, #5c1a1a, #1c0606 70%); }
+  .paint-4{ background:radial-gradient(circle at 35% 30%, #6b6862, #1a1a1a 70%); }
+  .paint-1, .paint-2, .paint-3, .paint-4{
+    background-blend-mode:screen;
+  }
+  .paint-1::before, .paint-2::before, .paint-3::before, .paint-4::before{
+    content:'';
+    position:absolute; inset:0;
+    background-image:
+      radial-gradient(1px 1px at 20% 30%, rgba(255,255,255,0.5), transparent),
+      radial-gradient(1px 1px at 60% 70%, rgba(255,255,255,0.4), transparent),
+      radial-gradient(1px 1px at 80% 20%, rgba(255,255,255,0.35), transparent),
+      radial-gradient(1px 1px at 40% 85%, rgba(255,255,255,0.3), transparent),
+      radial-gradient(1px 1px at 90% 55%, rgba(255,255,255,0.4), transparent);
+    background-size:60px 60px, 55px 55px, 65px 65px, 50px 50px, 70px 70px;
+  }
+
+  /* leather swatches — grain */
+  .leather-1, .leather-2, .leather-3, .leather-4{
+    background:linear-gradient(160deg, #3a2c1f, #1c150e);
+  }
+  .leather-2{ background:linear-gradient(160deg, #2b241d, #12100c); }
+  .leather-3{ background:linear-gradient(160deg, #201a15, #0b0908); }
+  .leather-4{ background:linear-gradient(160deg, #4a3624, #201509); }
+  .leather-1::before, .leather-2::before, .leather-3::before, .leather-4::before{
+    content:'';
+    position:absolute; inset:0;
+    background-image:repeating-linear-gradient(35deg, rgba(0,0,0,0.15) 0 2px, transparent 2px 4px),
+                      repeating-linear-gradient(-35deg, rgba(255,255,255,0.04) 0 2px, transparent 2px 4px);
+  }
+
+  /* carbon swatches — weave */
+  .carbon-1, .carbon-2{
+    background:#0c0c0d;
+  }
+  .carbon-1::before, .carbon-2::before{
+    content:'';
+    position:absolute; inset:0;
+    background-image:
+      repeating-linear-gradient(45deg, #1c1c1e 0 6px, #0a0a0b 6px 12px),
+      repeating-linear-gradient(-45deg, rgba(255,255,255,0.03) 0 6px, transparent 6px 12px);
+    background-blend-mode:overlay;
+  }
+  .carbon-2::before{
+    background-image:
+      repeating-linear-gradient(0deg, #1c1c1e 0 8px, #0a0a0b 8px 16px),
+      repeating-linear-gradient(90deg, rgba(255,255,255,0.02) 0 8px, transparent 8px 16px);
+  }
+  .carbon-3{ background:linear-gradient(160deg,#2a2a2c,#0d0d0e); }
+
+  .swatch-label{ font-size:0.65rem; color:var(--grigio); margin-top:8px; display:block; }
+
+  .commission-cta{
+    margin-top:64px; display:flex; align-items:center; gap:24px;
+  }
+  .btn{
+    display:inline-flex; align-items:center; gap:12px;
+    padding:16px 34px;
+    border:1px solid var(--bronzo);
+    color:var(--avorio);
+    font-size:0.78rem;
+    letter-spacing:0.14em;
+    text-transform:uppercase;
+    font-family:'IBM Plex Mono', monospace;
+    position:relative;
+    overflow:hidden;
+    transition:color 0.5s var(--ease), border-color 0.5s var(--ease);
+  }
+  .btn::before{
+    content:'';
+    position:absolute; inset:0;
+    background:var(--bronzo);
+    transform:scaleX(0);
+    transform-origin:left;
+    transition:transform 0.6s var(--ease);
+    z-index:-1;
+  }
+  .btn:hover::before{ transform:scaleX(1); }
+  .btn:hover{ color:var(--notte); }
+  .commission-note{ color:var(--grigio); font-size:0.85rem; }
+
+  /* ---------- CLIENTELE ---------- */
+  .clientele{
+    padding:140px 8vw;
+    text-align:center;
+    background:
+      radial-gradient(ellipse 60% 50% at 50% 0%, rgba(92,26,26,0.08), transparent 70%),
+      var(--notte);
+  }
+  .clientele .eyebrow{ justify-content:center; display:flex; }
+  .clientele h2{ font-size:clamp(2rem,4vw,3.4rem); max-width:16ch; margin:0 auto 28px; line-height:1.2; }
+  .clientele p{ color:var(--grigio); max-width:52ch; margin:0 auto 48px; line-height:1.8; }
+  .portal-door{
+    width:1px; height:90px; background:linear-gradient(var(--filo), var(--bronzo), var(--filo));
+    margin:0 auto 20px;
+    position:relative;
+  }
+  .portal-door::before{
+    content:'';
+    position:absolute; top:50%; left:50%;
+    width:6px; height:6px; border-radius:50%;
+    background:var(--bronzo-bright);
+    transform:translate(-50%,-50%);
+    box-shadow:0 0 16px var(--bronzo-bright);
+  }
+
+  /* ---------- FOOTER / CONTACT ---------- */
+  footer{
+    padding:100px 8vw 60px;
+    border-top:1px solid var(--filo);
+    display:flex; justify-content:space-between; align-items:flex-end; flex-wrap:wrap; gap:40px;
+  }
+  footer h3{ font-size:1.6rem; max-width:22ch; line-height:1.3; }
+  .footer-meta{ text-align:right; color:var(--grigio); font-size:0.78rem; line-height:2; }
+
+  @media (max-width:860px){
+    .chapter-grid{ grid-template-columns:1fr; gap:40px; }
+    .swatch-groups{ grid-template-columns:1fr; }
+    .craft-strip{ flex-direction:column; }
+    .craft-card{ aspect-ratio:16/9; }
+    footer{ flex-direction:column; align-items:flex-start; }
+    .footer-meta{ text-align:left; }
+  }
+
+  @media (prefers-reduced-motion: reduce){
+    *{ animation:none !important; transition:none !important; }
+    .reveal{ opacity:1; filter:none; transform:none; }
+  }
+</style>
+</head>
+<body>
+
+  <div class="nav-edge"></div>
+  <nav class="nav-menu">
+    <a href="#heritage">Heritage</a>
+    <a href="#atelier">Atelier</a>
+    <a href="#commission">The Commission</a>
+    <a href="#clientele">Clientele</a>
+    <a href="#contact">Private Enquiry</a>
+  </nav>
+  <div class="nav" id="mainNav">
+    <span class="nav-mark">O F F I C I N A</span>
+  </div>
+
+  <!-- HERO -->
+  <section class="hero" id="top">
+    <div class="hero-glow"></div>
+    <span class="hero-eyebrow mono">Torino · Est. 1961</span>
+    <h1 class="hero-mark">Every commission is <em>one of one.</em></h1>
+    <p class="hero-line">Four chassis a year. No configurator screenshots leave this building. No two cars, ever, alike.</p>
+    <div class="scroll-cue">
+      <span class="mono">Descend</span>
+      <div class="scroll-cue-line"></div>
+    </div>
+  </section>
+
+  <!-- HERITAGE -->
+  <section class="chapter" id="heritage">
+    <div class="chapter-grid">
+      <div class="reveal">
+        <div class="lineage-plate">
+          <div class="lineage-caption">
+            <span class="num">CHASSIS №004 — 1968</span>
+            <h3>The first commission.</h3>
+          </div>
+        </div>
+      </div>
+      <div class="reveal">
+        <span class="eyebrow mono">The Lineage</span>
+        <h2>Three generations, one bench.</h2>
+        <p>Since 1961 the Marelli family has built by hand what others build by machine — a single body shop, one panel beater's bench passed from father to daughter, and a client book kept in ink, never in software.</p>
+        <p>Sixty-three years later, the count stands at two hundred and eleven cars. Every one accounted for. Every one still known by name.</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- ATELIER -->
+  <section class="chapter" id="atelier">
+    <div style="width:100%;">
+      <div class="reveal" style="margin-bottom:56px; max-width:640px;">
+        <span class="eyebrow mono">The Atelier</span>
+        <h2>Nothing here is stamped.</h2>
+        <p>Every panel is beaten by eye over an English wheel. Every hide is selected, not ordered. Every weave is laid by the same three hands that laid the last two hundred.</p>
+      </div>
+      <div class="craft-strip reveal">
+        <div class="craft-card" data-tilt><span>The Panel</span></div>
+        <div class="craft-card" data-tilt><span>The Hide</span></div>
+        <div class="craft-card" data-tilt><span>The Weave</span></div>
+        <div class="craft-card" data-tilt><span>The Stitch</span></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- COMMISSION / CONFIGURATOR -->
+  <section class="commission" id="commission">
+    <div class="commission-head reveal">
+      <span class="eyebrow mono">The Commission</span>
+      <h2>Compose your specification.</h2>
+      <p>This is not a configurator. It is a sitting. Every material below is photographed under a single raking light — hover to turn the light in your hand.</p>
+    </div>
+
+    <div class="swatch-groups">
+      <div class="swatch-group reveal">
+        <span class="mono">Livree — Paint</span>
+        <div class="swatch-row">
+          <div class="swatch paint-1" data-swatch></div>
+          <div class="swatch paint-2" data-swatch></div>
+          <div class="swatch paint-3" data-swatch></div>
+          <div class="swatch paint-4" data-swatch></div>
+        </div>
+        <span class="swatch-label">Bronzo Fumato — flake depth 0.4mm, Tannery Codex 91-B</span>
+      </div>
+
+      <div class="swatch-group reveal">
+        <span class="mono">Pelle — Interior Hide</span>
+        <div class="swatch-row">
+          <div class="swatch leather-1" data-swatch></div>
+          <div class="swatch leather-2" data-swatch></div>
+          <div class="swatch leather-3" data-swatch></div>
+          <div class="swatch leather-4" data-swatch></div>
+        </div>
+        <span class="swatch-label">Cuoio Scuro — full-grain, vegetable tanned, Hide №1147</span>
+      </div>
+
+      <div class="swatch-group reveal">
+        <span class="mono">Fibra — Carbon Detail</span>
+        <div class="swatch-row">
+          <div class="swatch carbon-1" data-swatch></div>
+          <div class="swatch carbon-2" data-swatch></div>
+          <div class="swatch carbon-3" data-swatch></div>
+        </div>
+        <span class="swatch-label">Twill 2×2 — forged gloss, hand-laid, 6 plies</span>
+      </div>
+    </div>
+
+    <div class="commission-cta reveal">
+      <a href="#contact" class="btn">Request a Sitting</a>
+      <span class="commission-note">Chassis allocation currently: 2028</span>
+    </div>
+  </section>
+
+  <!-- CLIENTELE -->
+  <section class="clientele" id="clientele">
+    <div class="reveal">
+      <span class="eyebrow mono">The Clientele</span>
+      <div class="portal-door"></div>
+      <h2>An archive that opens for one person at a time.</h2>
+      <p>Vehicle dossiers, cryptographic authentication, track invitations, and a single line to your advisor — accessible only by credential issued at delivery.</p>
+      <a href="#contact" class="btn" style="border-color:var(--filo);">Owner Access</a>
+    </div>
+  </section>
+
+  <!-- FOOTER / CONTACT -->
+  <footer id="contact">
+    <h3>Enquiries are received by introduction, in writing, to Torino.</h3>
+    <div class="footer-meta">
+      <div>OFFICINA MARELLI</div>
+      <div>Via dei Carrozzieri 14, Torino</div>
+      <div>By appointment only</div>
+    </div>
+  </footer>
+
+<script>
+  // Nav reveal after first scroll
+  const nav = document.getElementById('mainNav');
+  window.addEventListener('scroll', () => {
+    if(window.scrollY > window.innerHeight * 0.6){ nav.classList.add('visible'); }
+    else { nav.classList.remove('visible'); }
+  }, { passive:true });
+
+  // Scroll reveal via IntersectionObserver
+  const io = new IntersectionObserver((entries) => {
+    entries.forEach(e => { if(e.isIntersecting) e.target.classList.add('in'); });
+  }, { threshold:0.2 });
+  document.querySelectorAll('.reveal').forEach(el => io.observe(el));
+
+  // Raking light — swatches and craft cards follow cursor
+  function attachRakingLight(selector){
+    document.querySelectorAll(selector).forEach(el => {
+      el.addEventListener('mousemove', (e) => {
+        const rect = el.getBoundingClientRect();
+        const mx = ((e.clientX - rect.left) / rect.width) * 100;
+        const my = ((e.clientY - rect.top) / rect.height) * 100;
+        el.style.setProperty('--mx', mx + '%');
+        el.style.setProperty('--my', my + '%');
+      });
+    });
+  }
+  attachRakingLight('[data-swatch]');
+  attachRakingLight('[data-tilt]');
+</script>
+
+</body>
+</html>
